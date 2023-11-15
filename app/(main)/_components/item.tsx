@@ -9,7 +9,7 @@ import {
   Trash,
 } from "lucide-react";
 import { useMutation } from "convex/react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useUser } from "@clerk/clerk-react";
 
@@ -52,6 +52,7 @@ const Item = ({
 }: ItemProps) => {
   const { user } = useUser();
   const router = useRouter();
+  const params = useParams();
   const create = useMutation(api.documents.create);
   const archive = useMutation(api.documents.archive);
 
@@ -66,6 +67,8 @@ const Item = ({
       success: "Note moved to trash!",
       error: "Failed to archive note.",
     });
+
+    if (id === params.documentId) router.push("/documents");
   };
 
   const handleExpand = (
