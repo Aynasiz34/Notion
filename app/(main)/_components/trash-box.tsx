@@ -11,6 +11,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import Spinner from "@/components/spinner";
 import { Input } from "@/components/ui/input";
 import ConfirmModal from "@/components/modals/confirm-modal";
+import { useEdgeStore } from "@/lib/edgestore";
 
 const TrashBox = () => {
   const router = useRouter();
@@ -18,6 +19,7 @@ const TrashBox = () => {
   const documents = useQuery(api.documents.getThrash);
   const restore = useMutation(api.documents.restore);
   const remove = useMutation(api.documents.remove);
+  const { edgestore } = useEdgeStore();
 
   const [search, setSearch] = useState("");
 
@@ -44,8 +46,15 @@ const TrashBox = () => {
     });
   };
 
-  const onRemove = (documentId: Id<"documents">) => {
+  const onRemove = async (documentId: Id<"documents">) => {
     const promise = remove({ id: documentId });
+    const document = documents?.find((doc) => doc._id === documentId);
+
+    if (document?.coverImage) {
+      await edgestore.publicFiles.delete({
+        url: document?.coverImage,
+      });
+    }
 
     toast.promise(promise, {
       loading: "Deleting note...",
